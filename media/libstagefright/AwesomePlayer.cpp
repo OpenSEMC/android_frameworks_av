@@ -42,7 +42,11 @@
 #include <media/stagefright/timedtext/TimedTextDriver.h>
 #include <media/stagefright/AudioPlayer.h>
 #ifdef QCOM_HARDWARE
+#ifdef LEGACY_LPA
+#include <media/stagefright/LPAPlayerLegacy.h>
+#else
 #include <media/stagefright/LPAPlayer.h>
+#endif
 #ifdef USE_TUNNEL_MODE
 #include <media/stagefright/TunnelPlayer.h>
 #endif
@@ -1883,12 +1887,6 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
 
 void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
     ATRACE_CALL();
-    if (mSeeking != NO_SEEK)
-    {
-        Mutex::Autolock autoLock(mStatsLock);
-        mStats.mLastSeekToTimeMs = mSeekTimeUs/1000;
-        printStats();
-    }
 
     if (mSeeking == SEEK_VIDEO_ONLY) {
         mSeeking = NO_SEEK;
@@ -3248,3 +3246,4 @@ inline int64_t AwesomePlayer::getTimeOfDayUs() {
     return (int64_t)tv.tv_sec * 1000000 + tv.tv_usec;
 }
 }  // namespace android
+

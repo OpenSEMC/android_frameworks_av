@@ -86,26 +86,24 @@ endif
 ifeq ($(TARGET_QCOM_AUDIO_VARIANT),caf)
     ifeq ($(BOARD_USES_ALSA_AUDIO),true)
         LOCAL_SRC_FILES += LPAPlayerALSA.cpp
-    endif
-    ifeq ($(call is-chipset-in-board-platform,msm8960),true)
-        LOCAL_SRC_FILES += TunnelPlayer.cpp
-        LOCAL_CFLAGS += -DUSE_TUNNEL_MODE
-        LOCAL_CFLAGS += -DTUNNEL_MODE_SUPPORTS_AMRWB
-    endif
-    ifeq ($(NO_TUNNEL_MODE_FOR_MULTICHANNEL),true)
-        LOCAL_CFLAGS += -DNO_TUNNEL_MODE_FOR_MULTICHANNEL
+        ifeq ($(call is-chipset-in-board-platform,msm8960),true)
+            LOCAL_SRC_FILES += TunnelPlayer.cpp
+            LOCAL_CFLAGS += -DUSE_TUNNEL_MODE
+            LOCAL_CFLAGS += -DTUNNEL_MODE_SUPPORTS_AMRWB
+        endif
+        ifeq ($(NO_TUNNEL_MODE_FOR_MULTICHANNEL),true)
+            LOCAL_CFLAGS += -DNO_TUNNEL_MODE_FOR_MULTICHANNEL
+        endif
+    else
+        LOCAL_SRC_FILES += LPAPlayer.cpp
+        LOCAL_CFLAGS += -DLEGACY_LPA
     endif
 endif
 
 ifeq ($(TARGET_QCOM_MEDIA_VARIANT),caf)
 LOCAL_C_INCLUDES += \
         $(TOP)/hardware/qcom/media-caf/mm-core/inc
-endif
-ifeq ($(TARGET_QCOM_MEDIA_VARIANT),legacy)
-LOCAL_C_INCLUDES += \
-        $(TOP)/hardware/qcom/media-legacy/mm-core/inc
-endif
-ifeq ($(TARGET_QCOM_MEDIA_VARIANT),)
+else
 LOCAL_C_INCLUDES += \
         $(TOP)/hardware/qcom/media/mm-core/inc
 endif
@@ -181,21 +179,13 @@ LOCAL_MODULE_TAGS := optional
 
 
 ifeq ($(TARGET_ENABLE_QC_AV_ENHANCEMENTS),true)
-    LOCAL_CFLAGS += -DENABLE_QC_AV_ENHANCEMENTS
-    LOCAL_SRC_FILES  += ExtendedWriter.cpp
-    LOCAL_SRC_FILES  += QCMediaDefs.cpp
-    ifeq ($(TARGET_QCOM_MEDIA_VARIANT),caf)
-        LOCAL_C_INCLUDES += \
-            $(TOP)/hardware/qcom/media-caf/mm-core/inc
-    else
-        LOCAL_C_INCLUDES += \
-            $(TOP)/hardware/qcom/media/mm-core/inc
-    endif
-    ifeq ($(TARGET_ENABLE_DEFAULT_SMOOTHSTREAMING),true)
-            LOCAL_CFLAGS += -DENABLE_DEFAULT_SMOOTHSTREAMING
-    endif #TARGET_ENABLE_DEAFULT_SMOOTHSTREAMING
+       LOCAL_CFLAGS += -DENABLE_QC_AV_ENHANCEMENTS
+       LOCAL_SRC_FILES  += ExtendedWriter.cpp
+       LOCAL_SRC_FILES  += QCMediaDefs.cpp
+       LOCAL_C_INCLUDES += $(TOP)/hardware/qcom/media/mm-core/inc
 endif #TARGET_ENABLE_QC_AV_ENHANCEMENTS
 
 include $(BUILD_SHARED_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
+
